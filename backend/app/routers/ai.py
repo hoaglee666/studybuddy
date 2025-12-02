@@ -5,7 +5,7 @@ from ..database import get_db
 from ..models.user import User
 from ..models.note import Note
 from ..models.flashcard import Flashcard
-from ..schemas.study_session import (
+from ..schemas.chat import (
     AIMessageRequest, AIMessageResponse,
     SummarizeRequest, QuizGenerateRequest
 )
@@ -68,7 +68,7 @@ async def generate_quiz(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
     
-@round.post("/generate-flashcards")
+@router.post("/generate-flashcards")
 async def generate_flashcards_from_content(
     note_id: int,
     num_cards: int = 10,

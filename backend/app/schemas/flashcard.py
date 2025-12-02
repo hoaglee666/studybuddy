@@ -32,6 +32,6 @@ class FlashcardResponse(FlashcardBase):
     class Config:
         from_attributes = True
 
-class FlashcardListReponse(BaseModel):
+class FlashcardListResponse(BaseModel):
     flashcards: list[FlashcardResponse]
     total: int

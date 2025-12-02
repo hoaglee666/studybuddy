@@ -29,6 +29,6 @@ class SummarizeRequest(BaseModel):
     text: str
     max_length: Optional[str] = 150
 
-class QuizGeneralRequest(BaseModel):
+class QuizGenerateRequest(BaseModel):
     content: str
     num_questions: Optional[int] = 5
