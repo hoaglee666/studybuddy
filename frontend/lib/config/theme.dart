@@ -25,7 +25,7 @@ class AppTheme {
       secondary: secondaryColor,
       tertiary: accentColor,
       error: errorColor,
-      background: backgroundColor,
+      surfaceContainer: backgroundColor,
       surface: surfaceColor,
     ),
     scaffoldBackgroundColor: backgroundColor,
