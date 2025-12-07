@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:studybuddy/providers/auth_provider.dart';
-import 'package:studybuddy/screens/auth/register_screen.dart';
+import '../../providers/auth_provider.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -25,10 +26,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
       final success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
+
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -52,8 +55,9 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 60),
-                //logo
-                const Icon(Icons.school, size: 80, color: Color(0xff6366f1)),
+
+                // Logo/Title
+                const Icon(Icons.school, size: 80, color: Color(0xFF6366F1)),
                 const SizedBox(height: 24),
                 Text(
                   'StudyBuddy',
@@ -62,12 +66,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your AI learning companion',
+                  'Your AI-Powered Learning Companion',
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
-                //email
+
+                // Email Field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -86,7 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                //pass
+
+                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
@@ -117,7 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
-                //login
+
+                // Login Button
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, _) {
                     return ElevatedButton(
@@ -138,7 +145,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                //regis
+
+                // Register Link
                 TextButton(
                   onPressed: () {
                     Navigator.push(

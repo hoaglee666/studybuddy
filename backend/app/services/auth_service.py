@@ -10,9 +10,12 @@ class AuthService:
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         return pwd_context.verify(plain_password, hashed_password)
-
+    
     @staticmethod
     def get_password_hash(password: str) -> str:
+        # Bcrypt has a 72 byte limit - truncate if needed
+        if len(password.encode('utf-8')) > 72:
+            password = password[:72]
         return pwd_context.hash(password)
     
     @staticmethod
@@ -22,6 +25,9 @@ class AuthService:
             return None
         if not user.hashed_password:
             return None
+        # Truncate password for verification too
+        if len(password.encode('utf-8')) > 72:
+            password = password[:72]
         if not AuthService.verify_password(password, user.hashed_password):
             return None
         return user
@@ -33,9 +39,9 @@ class AuthService:
             hashed_password = AuthService.get_password_hash(user.password)
         
         db_user = User(
-            email = user.email,
-            name = user.name,
-            hashed_password = hashed_password
+            email=user.email,
+            name=user.name,
+            hashed_password=hashed_password
         )
         db.add(db_user)
         db.commit()
@@ -47,35 +53,35 @@ class AuthService:
         db: Session,
         email: str,
         name: str,
-        oath_provider: str,
-        oath_id: str,
+        oauth_provider: str,
+        oauth_id: str,
         profile_image: str = None
     ) -> User:
-        #check user exist
+        # Check if user exists
         user = db.query(User).filter(User.email == email).first()
-
+        
         if user:
-            #update oauth info 
+            # Update OAuth info if needed
             if not user.oauth_provider:
-                user.oauth_provider = oath_provider
-                user.oauth_id = oath_id
+                user.oauth_provider = oauth_provider
+                user.oauth_id = oauth_id
             if profile_image and not user.profile_image:
                 user.profile_image = profile_image
             db.commit()
             db.refresh(user)
             return user
         
-        #create new user
+        # Create new user
         new_user = User(
-            email = email,
-            name = name,
-            oauth_provider = oath_provider,
-            oath_id = oath_id,
-            profile_image = profile_image
+            email=email,
+            name=name,
+            oauth_provider=oauth_provider,
+            oauth_id=oauth_id,
+            profile_image=profile_image
         )
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
         return new_user
-    
+
 auth_service = AuthService()

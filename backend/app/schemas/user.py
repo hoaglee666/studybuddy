@@ -10,7 +10,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: Optional[str] = None
 
-class UserLogin(BaseModel): 
+class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
@@ -25,7 +25,7 @@ class UserResponse(UserBase):
     oauth_provider: Optional[str]
     is_active: int
     created_at: datetime
-
+    
     class Config:
         from_attributes = True
 

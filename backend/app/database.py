@@ -3,21 +3,20 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from .config import settings
 
-
-#create db engine
+# Create database engine
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,
     echo=settings.DEBUG
 )
 
-#create session factory
+# Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-#base class for models
+# Base class for models
 Base = declarative_base()
 
-#dependency to get db sess
+# Dependency to get database session
 def get_db():
     db = SessionLocal()
     try:

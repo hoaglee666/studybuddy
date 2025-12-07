@@ -5,33 +5,35 @@ import os
 
 from .config import settings
 from .database import engine, Base
-from .routers import auth, notes, flashcards, analytics, ai, study_sessions, websocket
+from .routers import auth, notes, flashcards, ai, websocket, analytics, study_sessions
 
-#create db table
+# Create database tables
 Base.metadata.create_all(bind=engine)
 
-#create fastapi app
+# Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
     debug=settings.DEBUG
 )
 
-#cors midd
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=getattr(settings, 'CORS_ORIGIN_REGEX', None),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-#create upload dir if not exist
+# Create uploads directory if it doesn't exist
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-#mount upload dir for serving
+
+# Mount uploads directory for serving static files
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
-#routers
+# Include routers
 app.include_router(auth.router)
 app.include_router(notes.router)
 app.include_router(flashcards.router)

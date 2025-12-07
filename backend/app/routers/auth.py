@@ -1,5 +1,5 @@
-from fastapi import  APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request
@@ -16,7 +16,7 @@ from ..models.user import User
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-#oauth setup
+# OAuth setup
 oauth = OAuth()
 oauth.register(
     name='google',
@@ -26,38 +26,43 @@ oauth.register(
     client_kwargs={'scope': 'openid email profile'}
 )
 
-#dependecy to get current user
+# Dependency to get current user
 async def get_current_user(
-        token: str = Depends(oauth2_scheme),
-        db: Session = Depends(get_db)
-) -> User: 
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validat4e credentials",
+        detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
+    
     payload = decode_access_token(token)
     if payload is None:
         raise credentials_exception
+    
     user_id: int = payload.get("sub")
     if user_id is None:
         raise credentials_exception
+    
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise credentials_exception
+    
     return user
 
-@router.post("/register", response_model=Token) 
+@router.post("/register", response_model=Token)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     """Register new user with email and password"""
-    #check if exist
+    # Check if user exists
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    #create user
+    
+    # Create user
     new_user = auth_service.create_user(db, user)
-    #generate token
+    
+    # Generate tokens
     access_token = create_access_token(data={"sub": new_user.id})
     refresh_token = create_refresh_token(data={"sub": new_user.id})
     
@@ -69,7 +74,7 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """Login user with email and password"""
+    """Login with email and password"""
     user = auth_service.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -80,7 +85,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     
     access_token = create_access_token(data={"sub": user.id})
     refresh_token = create_refresh_token(data={"sub": user.id})
-
+    
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -89,19 +94,21 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 
 @router.get("/google/login")
 async def google_login(request: Request):
-    """Initiate Google OAuth2 login"""
+    """Initiate Google OAuth login"""
     redirect_uri = settings.GOOGLE_REDIRECT_URI
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/google/callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
-    """Handle gogole oauth2 callback"""
+    """Handle Google OAuth callback"""
     try:
         token = await oauth.google.authorize_access_token(request)
         user_info = token.get('userinfo')
+        
         if not user_info:
             raise HTTPException(status_code=400, detail="Failed to get user info from Google")
-        #get or create
+        
+        # Get or create user
         user = auth_service.get_or_create_oauth_user(
             db=db,
             email=user_info['email'],
@@ -110,27 +117,32 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             oauth_id=user_info['sub'],
             profile_image=user_info.get('picture')
         )
-
+        
+        # Generate tokens
         access_token = create_access_token(data={"sub": user.id})
         refresh_token = create_refresh_token(data={"sub": user.id})
-
-        #production redirect to mobile app with toeken, now just json
+        
+        # In production, redirect to mobile app with tokens
+        # For now, return tokens as JSON
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer"
         }
+    
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information"""
     return current_user
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    """Refresh access token using refresh token"""
     from ..utils.jwt import verify_token
-
+    
     payload = verify_token(refresh_token)
     if not payload or payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -142,7 +154,7 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
     
     access_token = create_access_token(data={"sub": user.id})
     new_refresh_token = create_refresh_token(data={"sub": user.id})
-
+    
     return {
         "access_token": access_token,
         "refresh_token": new_refresh_token,

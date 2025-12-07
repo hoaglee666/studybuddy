@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     #db
-    DATABASE_URL: str = "postgresql://postgres:01226255@localhost:5432/studybuddy"
+    DATABASE_URL: str = "postgresql://postgres:password@db:5432/studybuddy"
 
     #jwt
     SECRET_KEY: str = "iGPz9qufe0-rpv0rOWnCD1fBtF6TcT7flqsd_gfFOPY"
@@ -27,10 +27,15 @@ class Settings(BaseSettings):
 
     #cors
     CORS_ORIGINS: list = [
-        "http://localhost:3000",
-        "http://localhost:8080",
         "http://10.0.2.2:8000",  # android emulator
+        "http://localhost",
+        "http://localhost:65208",
+        "http://127.0.0.1",
+        "http://192.168.123.2",     # your local network IP
+        "http://192.168.123.2:8000",
     ]
+    # regex to match localhost with any port (used for dynamic dev ports, e.g. Flutter web)
+    CORS_ORIGIN_REGEX: str = r"^http://localhost(:[0-9]+)?$"
 
     #file upload
     UPLOAD_DIR: str = "uploads"

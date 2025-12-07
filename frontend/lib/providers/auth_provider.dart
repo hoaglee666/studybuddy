@@ -1,6 +1,6 @@
-import 'package:flutter/widgets.dart';
-import 'package:studybuddy/models/user.dart';
-import 'package:studybuddy/services/auth_service.dart';
+import 'package:flutter/material.dart';
+import '../models/user.dart';
+import '../services/auth_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -15,7 +15,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  //check if authe on app start
+  // Check if user is authenticated on app start
   Future<void> checkAuth() async {
     _isLoading = true;
     notifyListeners();
@@ -35,10 +35,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Register
   Future<bool> register(String email, String name, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
     try {
       _user = await _authService.register(email, name, password);
       _isAuthenticated = true;
@@ -54,10 +56,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Login
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
     try {
       _user = await _authService.login(email, password);
       _isAuthenticated = true;
@@ -73,10 +77,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Google Sign In
   Future<bool> signInWithGoogle() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
     try {
       _user = await _authService.signInWithGoogle();
       _isAuthenticated = true;
@@ -92,6 +98,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Logout
   Future<void> logout() async {
     await _authService.logout();
     _user = null;
@@ -99,6 +106,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Clear error
   void clearError() {
     _error = null;
     notifyListeners();

@@ -1,6 +1,6 @@
 class AppConfig {
   //api config
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static const String baseUrl = 'http://192.168.123.2:8000';
   static const String apiUrl = '$baseUrl/api';
   static const String wsUrl = 'ws://10.0.2.2:8000/ws';
   //timeouts
